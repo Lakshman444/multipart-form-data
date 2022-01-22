@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="88a0b6a1-1dc9-4a51-8f2f-a760bd9dc94e" />
+	<file:config name="File_Config1" doc:name="File Config" doc:id="4ec50ce1-daea-4ebd-9f19-e25c0b2f2202" />
+	<flow name="multipartFlow" doc:id="4795e2a3-019d-4f9a-b3b6-49601e81b7a2" >
+		<http:listener doc:name="Listener" doc:id="0d523583-bc7d-4937-a9ac-56008bb789c4" config-ref="form-data-httpListenerConfig" path="/form"/>
+		<http:request method="POST" doc:name="Request" doc:id="72bed518-64cc-4b49-a8fc-6f8d2446c09c" url="http://form-data.de-c1.eu1.cloudhub.io/api/form-data">
+			<http:body ><![CDATA[#[output multipart/form-data
+---
+payload]]]></http:body>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="a9dbdaa8-00c5-441d-80ef-d9be3e7a4165" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var a = payload pluck($)
+---
+a[0] pluck($)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="efdf7ef2-238d-47e9-91b4-aa75ff39f2d1" >
+			<set-variable value='#[payload.headers."Content-Disposition".filename]' doc:name="Set Variable" doc:id="d70c68ba-2617-465b-be49-eef531ad0e28" variableName="a"/>
+			<file:write doc:name="Write" doc:id="9169a02c-1a06-439d-8fca-264b507d1705" config-ref="File_Config" path="#['E:\\multi.pdf\\' ++ vars.a]">
+				<file:content ><![CDATA[#[payload.content]]]></file:content>
+			</file:write>
+		</foreach>
+	</flow>
+	<flow name="multipartFlow1" doc:id="38c8a96c-0e34-46f1-af5f-d2cf2fb0e5b1">
+		<http:listener doc:name="Listener" doc:id="bbabd898-7ebe-4f21-86c6-83bade70a049" config-ref="form-data-httpListenerConfig" path="/data" />
+		<ee:transform doc:name="Transform Message" doc:id="40b53942-ed2c-489f-86b6-8adcddbe63c6">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="5e410ad0-163f-4912-a62f-fdb9511d0eae">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var a = payload pluck($)
+---
+a[0] pluck($)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="3bbf3887-d66e-41f8-89c2-9325831be41d">
+			<set-payload value="#[payload.content]" doc:name="Set Payload" doc:id="4ed6a86c-5538-497f-87cf-1c1b69e3af46" />
+			<file:write doc:name="Write" doc:id="e4a9bc82-c574-4dcb-94ff-8419ab4cb8f8" config-ref="File_Config" path='#["Desktop\\forms.pdf"]'/>
+		</foreach>
+	</flow>
+	<flow name="multipartFlow2" doc:id="90cd108c-88bf-4aac-ac84-db76a1cf91dc" >
+		<http:listener doc:name="Listener" doc:id="855c5ac9-debc-4d0e-80d5-95cee058208e" config-ref="form-data-httpListenerConfig" path="/test"/>
+		<logger level="INFO" doc:name="Logger" doc:id="f2db6efe-9bf4-450d-ae6c-d185c5e1a4a3" />
+		<ee:transform doc:name="Transform Message" doc:id="d754f837-aa33-440f-87db-7d0d937149f7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var a = payload pluck($)
+---
+a[0] pluck($)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="18c5684d-afca-4cbc-a16c-905d1ff3d6a4" >
+			<set-variable value='#[payload.headers."Content-Disposition".filename]' doc:name="Set Variable" doc:id="1bfb3751-f69a-4705-81cd-c7089c3101d2" variableName="a"/>
+			<set-payload value="#[payload.content]" doc:name="Set Payload" doc:id="98dc1ec5-d6d4-41e5-b97e-3d3b2fcbf6e6" />
+			<file:write doc:name="Write" doc:id="a978679b-bbdb-4269-b337-c6634dda1882" config-ref="File_Config" path='#["Desktop\\tests1.pdf"]' >
+			</file:write>
+		</foreach>
+	</flow>
+	<flow name="multipartFlow3" doc:id="f2beb970-5b2e-46d4-90a9-2b499561ad86" >
+		<http:listener doc:name="Listener" doc:id="b2dc41f5-b2b9-42bc-88d7-8570520bb3c7" config-ref="form-data-httpListenerConfig" path="/test1"/>
+		<file:write doc:name="Write" doc:id="2584a175-e06a-44d4-b37d-62cb943a6b8b" config-ref="File_Config" path='#["Desktop\\lucky.pdf"]'/>
+	</flow>
+</mule>
